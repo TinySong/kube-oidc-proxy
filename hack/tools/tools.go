@@ -1,3 +1,4 @@
+//go:build tools
 // +build tools
 
 // Copyright Jetstack Ltd. See LICENSE for details.

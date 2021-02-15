@@ -59,14 +59,11 @@ depend: $(BINDIR)/mockgen $(BINDIR)/kubectl $(BINDIR)/golangci-lint
 verify_boilerplate:
 	$(HACK_DIR)/verify-boilerplate.sh
 
-go_fmt:
-	@set -e; \
-	GO_FMT=$$(git ls-files *.go | xargs gofmt -d); \
-	if [ -n "$${GO_FMT}" ] ; then \
-		echo "Please run go fmt"; \
-		echo "$$GO_FMT"; \
-		exit 1; \
-	fi
+go_fmt: ## Run go fmt against code.
+	go fmt ./...
+
+go_vet: ## Run go vet against code.
+	go vet ./...
 
 go_vet:
 	go vet ./cmd
@@ -82,8 +79,10 @@ clean: ## clean up created files
 		$(CURDIR)/test/e2e/framework/issuer/bin \
 		$(CURDIR)/test/e2e/framework/fake-apiserver/bin
 
+#TODO: verfiy
 verify: depend verify_boilerplate go_fmt go_vet go_lint ## verify code and mod
 
+#TODO what is go generate
 generate: depend ## generates mocks and assets files
 	go generate $$(go list ./pkg/... ./cmd/...)
 

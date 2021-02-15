@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	k8sErrors "k8s.io/apimachinery/pkg/util/errors"
-	"k8s.io/apiserver/pkg/util/term"
 	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/component-base/term"
 )
 
 const (

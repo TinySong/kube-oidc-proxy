@@ -33,6 +33,7 @@ func (p *Proxy) withAuthenticateRequest(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Auth request and handle unauthed
 		info, ok, err := p.oidcRequestAuther.AuthenticateRequest(req)
+		klog.Error(err)
 		if err != nil {
 			// Since we have failed OIDC auth, we will try a token review, if enabled.
 			tokenReviewHandler.ServeHTTP(rw, req)
@@ -41,6 +42,7 @@ func (p *Proxy) withAuthenticateRequest(handler http.Handler) http.Handler {
 
 		// Failed authorization
 		if !ok {
+			klog.Info(ok)
 			p.handleError(rw, req, errUnauthorized)
 			return
 		}
@@ -62,12 +64,14 @@ func (p *Proxy) withTokenReview(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// If token review is not enabled then error.
 		if !p.config.TokenReview {
+			klog.Info(p.config.TokenReview)
 			p.handleError(rw, req, errUnauthorized)
 			return
 		}
 
 		// Attempt to passthrough request if valid token
 		if !p.reviewToken(rw, req) {
+			klog.Info("reviewToken")
 			// Token review failed so error
 			p.handleError(rw, req, errUnauthorized)
 			return
@@ -102,6 +106,7 @@ func (p *Proxy) withImpersonateRequest(handler http.Handler) http.Handler {
 		}
 
 		if p.hasImpersonation(req.Header) {
+			klog.Info(req.Header)
 			p.handleError(rw, req, errImpersonateHeader)
 			return
 		}
@@ -109,6 +114,7 @@ func (p *Proxy) withImpersonateRequest(handler http.Handler) http.Handler {
 		user, ok := genericapirequest.UserFrom(req.Context())
 		// No name available so reject request
 		if !ok || len(user.GetName()) == 0 {
+			klog.Info(errNoName)
 			p.handleError(rw, req, errNoName)
 			return
 		}
